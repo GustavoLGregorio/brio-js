@@ -13,6 +13,9 @@ export class GameScreen {
 	#title;
 	/** @type {Function=} callback */
 	#callback;
+	/** @type {Map<string, GameObject>} */
+	#gameObjects = new Map();
+
 	/**
 	 * @param {number} width
 	 * @param {number} height
@@ -74,6 +77,10 @@ export class GameScreen {
 		return this.#height;
 	}
 
+	get gameObjects() {
+		return this.#gameObjects;
+	}
+
 	/**
 	 * ----------------------------------------------------------------------------------
 	 * Methods
@@ -109,34 +116,118 @@ export class GameScreen {
 	}
 
 	/** Insantiate a GameObject into your GameScreen
-	 * @param {GameObject} gameObject
+	 * @param {Function} callback
 	 * @example const GS = new GameScreen(640, 480, "main-screen");
 	 * GS.appendTo(document.body);
 	 *
 	 * const player = new GameObject(0, 0, "./player_spr.png", 64, 64);
 	 * GS.instantiate(player);
 	 * */
-	instantiate(gameObject) {
-		const draw = () => {
-			if (this.#context) {
-				this.#context.drawImage(
-					gameObject.element,
-					gameObject.posX,
-					gameObject.posY,
-					gameObject.width,
-					gameObject.height,
-				);
+	load(callback) {
+		const result = callback();
+
+		const objects = Array.isArray(result) ? result : [result];
+
+		for (const gameObject of objects) {
+			const draw = () => {
+				if (this.#context) {
+					this.#context.drawImage(
+						gameObject.element,
+						gameObject.posX,
+						gameObject.posY,
+						gameObject.width,
+						gameObject.height,
+					);
+				}
+			};
+
+			if (gameObject.element.complete) {
+				draw();
+			} else {
+				gameObject.element.onload = draw;
 			}
-		};
-		if (gameObject.element.complete) {
-			draw(); // imagem já carregada
-		} else {
-			gameObject.element.onload = draw;
+
+			this.#gameObjects.set(gameObject.objectName, gameObject);
+			console.info(`"${gameObject.objectName}" has been added to gameObjects Map`);
 		}
+	}
+
+	/**
+	 * @param {GameObject} gameObject
+	 */
+	#clear(gameObject) {
+		if (this.#context) {
+			this.#context.clearRect(
+				gameObject.posX,
+				gameObject.posY,
+				gameObject.width,
+				gameObject.height,
+			);
+		}
+	}
+
+	/** @param {GameObject} gameObject */
+	destroy(gameObject) {
+		if (this.#gameObjects.has(gameObject.objectName)) {
+			console.info(`"${gameObject.objectName}" has been removed of gameObjects Map`);
+			gameObject.element.onload = () => {
+				this.#clear(gameObject);
+			};
+			this.#gameObjects.delete(gameObject.objectName);
+		}
+	}
+
+	/**
+	 * @callback UpdateCallback
+	 * @param {Map<string, GameObject>} gameObjects - Mapa com os objetos do jogo
+	 */
+
+	/**
+	 * @param {UpdateCallback} callback Function that returns GameObjects loaded and updates what you do inside it every frame
+	 * @example GS.update((gameObjects) => {
+	 * const player = gameObjects.get("player")
+	 *
+	 * player.posX += 5
+	 * })
+	 */
+	update(callback) {
+		const objects = this.#gameObjects;
+		const canvasWidth = this.#element.width;
+		const canvasHeight = this.#element.height;
+
+		const loop = () => {
+			this.#context?.clearRect(0, 0, canvasWidth, canvasHeight);
+			callback(this.#gameObjects);
+
+			for (const gameObject of objects) {
+				const draw = () => {
+					if (this.#context) {
+						this.#context.drawImage(
+							gameObject[1].element,
+							gameObject[1].posX,
+							gameObject[1].posY,
+							gameObject[1].width,
+							gameObject[1].height,
+						);
+					}
+				};
+
+				if (gameObject[1].element.complete) {
+					draw();
+				} else {
+					gameObject[1].element.onload = draw;
+				}
+			}
+
+			requestAnimationFrame(loop);
+		};
+		requestAnimationFrame(loop);
 	}
 }
 
 export class GameObject {
+	/** @type {string} objectName */
+	#objectName;
 	/** @type {number} posX */
 	#posX;
 	/** @type {number} posY */
@@ -149,15 +240,19 @@ export class GameObject {
 	#spr;
 	/** @type {HTMLImageElement} element */
 	#element;
+	/** @type {object} registeredActions */
+	registeredActions = {};
 
 	/**
+	 * @param {string} objectIdentifier
 	 * @param {number} posX
 	 * @param {number} posY
 	 * @param {string} spriteURI
 	 * @param {number} width
 	 * @param {number} height
 	 */
-	constructor(posX = 0, posY = 0, spriteURI = "", width = 64, height = 64) {
+	constructor(objectIdentifier, posX = 0, posY = 0, spriteURI = "", width = 64, height = 64) {
+		this.#objectName = objectIdentifier;
 		this.#posX = posX;
 		this.#posY = posY;
 		this.#spr = spriteURI;
@@ -260,6 +355,10 @@ export class GameObject {
 		return this.#element;
 	}
 
+	get objectName() {
+		return this.#objectName;
+	}
+
 	/**
 	 * ----------------------------------------------------------------------------------
 	 * Methods
@@ -275,5 +374,48 @@ export class GameObject {
 			this.#element.onerror = reject;
 			this.#element.src = this.#spr;
 		});
+	}
+
+	/**
+	 * @typedef {object} ArrowKeys
+	 * @property {() => void} [ArrowUp]
+	 * @property {() => void} [ArrowDown]
+	 * @property {() => void} [ArrowLeft]
+	 * @property {() => void} [ArrowRight]
+	 *
+	 * @typedef {object} KeyEventTypes
+	 * @property {ArrowKeys} [onKeyDown]
+	 * @property {ArrowKeys} [onKeyUp]
+	 * @property {ArrowKeys} [onKeyPress]
+	 *
+	 * @param {KeyEventTypes} keyBindingsObject
+	 **/
+	setActions(keyBindingsObject) {
+		this.registeredActions = Object.assign({}, this.registeredActions, keyBindingsObject);
+
+		if (!this._actionsInitialized) {
+			this._actionsInitialized = true;
+
+			window.addEventListener("keydown", (e) => {
+				const action = this.registeredActions.onKeyDown?.[e.key];
+				if (typeof action === "function") {
+					action();
+				}
+			});
+
+			window.addEventListener("keyup", (e) => {
+				const action = this.registeredActions.onKeyUp?.[e.key];
+				if (typeof action === "function") {
+					action();
+				}
+			});
+
+			window.addEventListener("keypress", (e) => {
+				const action = this.registeredActions.onKeyPress?.[e.key];
+				if (typeof action === "function") {
+					action();
+				}
+			});
+		}
 	}
 }
