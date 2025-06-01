@@ -124,6 +124,7 @@ export class GameScreen {
 	 * GS.instantiate(player);
 	 * */
 	load(callback) {
+		/** @type {Array<GameObject> | GameObject} result */
 		const result = callback();
 
 		const objects = Array.isArray(result) ? result : [result];
@@ -131,6 +132,7 @@ export class GameScreen {
 		for (const gameObject of objects) {
 			const draw = () => {
 				if (this.#context) {
+					console.log(gameObject);
 					this.#context.drawImage(
 						gameObject.element,
 						gameObject.posX,
@@ -232,13 +234,15 @@ export class GameObject {
 	#posX;
 	/** @type {number} posY */
 	#posY;
-	/** @type {number=} width */
+	/** @type {number} width */
 	#width;
-	/** @type {number=} height */
+	/** @type {number} height */
 	#height;
 	/** @type {string} spr */
 	#spr;
 	/** @type {HTMLImageElement} element */
+	/** @type {any} */
+	#scale = 1;
 	#element;
 	/** @type {object} registeredActions */
 	registeredActions = {};
@@ -259,8 +263,11 @@ export class GameObject {
 		this.#width = width;
 		this.#height = height;
 		this.#element = new Image();
+		this.#scale = 1;
 
 		this.#loadImage();
+
+		this.el = this.#element;
 	}
 
 	/**
@@ -359,6 +366,20 @@ export class GameObject {
 		return this.#objectName;
 	}
 
+	get scale() {
+		return this.#scale;
+	}
+	set scale(value) {
+		if (value < 0) {
+			console.log("-");
+			this.#element.style.rotate = "y 180deg";
+
+			value = value * -1;
+		}
+		this.#width *= value;
+		this.#height *= value;
+	}
+
 	/**
 	 * ----------------------------------------------------------------------------------
 	 * Methods
@@ -383,10 +404,16 @@ export class GameObject {
 	 * @property {() => void} [ArrowLeft]
 	 * @property {() => void} [ArrowRight]
 	 *
+	 * @typedef {object} WASDKeys
+	 * @property {() => void} [w]
+	 * @property {() => void} [s]
+	 * @property {() => void} [a]
+	 * @property {() => void} [d]
+	 *
 	 * @typedef {object} KeyEventTypes
-	 * @property {ArrowKeys} [onKeyDown]
-	 * @property {ArrowKeys} [onKeyUp]
-	 * @property {ArrowKeys} [onKeyPress]
+	 * @property {ArrowKeys | WASDKeys} [onKeyDown]
+	 * @property {WASDKeys} [onKeyUp]
+	 * @property {WASDKeys} [onKeyPress]
 	 *
 	 * @param {KeyEventTypes} keyBindingsObject
 	 **/
