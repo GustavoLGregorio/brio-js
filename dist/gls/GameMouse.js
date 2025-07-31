@@ -1,26 +1,26 @@
-export class GameGamepad {
+export class GameMouse {
     /** @type {Map<string, boolean>} A map that stores the keyboard overall state of keys that are being pressed (true) or not (false) */
-    #gamepadState;
+    #mouseState;
     #keyDownListenerId;
     #keyUpListenerId;
     constructor(keyboardStateMap) {
-        this.#gamepadState = keyboardStateMap;
+        this.#mouseState = keyboardStateMap;
         this.#addListener();
     }
     #addListener() {
         this.#keyDownListenerId = (event) => {
             event.preventDefault();
-            if (!this.#gamepadState.has(event.key)) {
-                this.#gamepadState.set(event.key, true);
+            if (!this.#mouseState.has(event.key)) {
+                this.#mouseState.set(event.key, true);
             }
-            if (this.#gamepadState.get(event.key) === false) {
-                this.#gamepadState.set(event.key, true);
+            if (this.#mouseState.get(event.key) === false) {
+                this.#mouseState.set(event.key, true);
             }
         };
         this.#keyUpListenerId = (event) => {
             event.preventDefault();
-            if (this.#gamepadState.get(event.key) === true) {
-                this.#gamepadState.set(event.key, false);
+            if (this.#mouseState.get(event.key) === true) {
+                this.#mouseState.set(event.key, false);
             }
         };
         window.addEventListener("keydown", this.#keyDownListenerId);
@@ -35,8 +35,8 @@ export class GameGamepad {
         }
     }
     isDown(key) {
-        if (this.#gamepadState.has(key)) {
-            if (this.#gamepadState.get(key) === true) {
+        if (this.#mouseState.has(key)) {
+            if (this.#mouseState.get(key) === true) {
                 return true;
             }
         }
