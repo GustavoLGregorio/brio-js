@@ -3,7 +3,7 @@ import { BrioObject } from "./BrioObject.js";
 import { BrioKeyboard } from "./input/BrioKeyboard.js";
 import { BrioMap } from "./BrioMap.js";
 import { BrioCamera } from "./BrioCamera.js";
-import { GameAudio } from "./asset/GameAudio.js";
+import { BrioAudio } from "./asset/BrioAudio.js";
 import { BrioLogger } from "./logging/BrioLogger.js";
 // Used for managing the game-state step process
 var GameState;
@@ -14,7 +14,7 @@ var GameState;
     GameState[GameState["update"] = 3] = "update";
     GameState[GameState["error"] = 4] = "error";
 })(GameState || (GameState = {}));
-export class Game {
+export class BrioGame {
     // CANVAS
     /** @type {HTMLCanvasElement} Canvas element that serves as the game sandbox */
     #canvas;
@@ -38,7 +38,7 @@ export class Game {
     #loadedSprites = new Map();
     /** @type {Map<string, BrioObject>} A map that stores loaded gameobjects (returned in the load state) */
     #loadedGameObjects = new Map();
-    /** @type {Map<string, GameAudio>} A map that stores loaded game audios (returned in the preload state) */
+    /** @type {Map<string, BrioAudio>} A map that stores loaded game audios (returned in the preload state) */
     #loadedAudios = new Map();
     /** @type {Map<string, GameMap>} A map that stores loaded game maps (returned in the preload state) */
     #loadedGameMaps = new Map();
@@ -83,10 +83,10 @@ export class Game {
      */
     constructor(width, height, appendToElement, canvasContextSettings = {}) {
         if (width < 0 || height < 0) {
-            BrioLogger.out("warn", "Game constructor: Negative values converted into positive.");
+            BrioLogger.out("warn", "BrioGame constructor: Negative values converted into positive.");
         }
         if (!(appendToElement instanceof HTMLElement)) {
-            BrioLogger.fatalError("Game constructor: A Game should be appended to a working HTMLElement.");
+            BrioLogger.fatalError("BrioGame constructor: A BrioGame should be appended to a working HTMLElement.");
         }
         this.#width = Math.abs(width);
         this.#height = Math.abs(height);
@@ -148,7 +148,7 @@ export class Game {
     }
     /** The global scale of the canvas object. All objects are scaled according to this property
      * @type {number}
-     * @example const game = new Game(600, 400, document.body);
+     * @example const game = new BrioGame(600, 400, document.body);
      * game.scale = 2; // 128px sprites are now 256px
      */
     get scale() {
@@ -158,7 +158,7 @@ export class Game {
         this.#scale = Math.abs(scaleValue);
     }
     /** The rendering type used in the game
-     * @example const game = new Game(600, 400, document.body);
+     * @example const game = new BrioGame(600, 400, document.body);
      * game.renderingType = "pixelated"; // makes the sprites crispy looking
      * @default "smooth"
      */
@@ -170,7 +170,7 @@ export class Game {
         this.#renderingType = renderingType;
     }
     /** The quality of the smoothness of game sprites. Only works when renderingType is set to "smooth"
-     * @example const game = new Game(600, 400, document.body);
+     * @example const game = new BrioGame(600, 400, document.body);
      * game.renderingType = "smooth";
      * game.smoothingQuality = "high"; // makes the sprites more smooth
      * @default "low"
@@ -198,7 +198,7 @@ export class Game {
      * The first step into the game logic responsible for preloading assets
      * such as GameSprites, Audios and Videos. Those assets are loaded in an
      * assyncronous manner, that's why this step in needed
-     * @param {() => Array<BrioSprite | GameAudio>} callbackFn
+     * @param {() => Array<BrioSprite | BrioAudio>} callbackFn
      */
     preload(callbackFn) {
         this.#lifecyclePromise = this.#lifecyclePromise.then(async () => {
@@ -208,7 +208,7 @@ export class Game {
                 throw new Error("Zero assets returned. You must return at least one asset.");
             }
             const sprites = assets.filter((asset) => asset instanceof BrioSprite);
-            const audios = assets.filter((asset) => asset instanceof GameAudio);
+            const audios = assets.filter((asset) => asset instanceof BrioAudio);
             const spriteLoadPromises = sprites.map((sprite) => {
                 return new Promise((resolve, reject) => {
                     sprite.element.onload = () => {
@@ -247,7 +247,7 @@ export class Game {
      * @typedef {object} AssetsObject The object passed as a param into the callbackFn
      * @property {() => void} logAssets Logs the available sprites that were preloaded
      * @property {(spriteName: string) => BrioSprite} getSprite Returns the BrioSprite object with the given name
-     * @property {(audioName: string) => GameAudio} getAudio Returns the GameAudio object with the given name
+     * @property {(audioName: string) => BrioAudio} getAudio Returns the BrioAudio object with the given name
      **/
     /** @param {(assets: AssetsObject) => Array<BrioObject | GameMap>} callbackFn A callback function that passes, by param, an object for assets manipulation */
     load(callbackFn) {
@@ -280,7 +280,7 @@ export class Game {
                             return aud;
                         }
                     }
-                    return GameAudio.getEmptyInstance();
+                    return BrioAudio.getEmptyInstance();
                 },
             };
             const objects = callbackFn(assetsManipulationObject);
@@ -305,7 +305,7 @@ export class Game {
      * @typedef {object} UpdaterObject The object passed as a param into the callbackFn
      * @property {() => void} logObjectKeys Logs the available objects that were loaded
      * @property {(spriteName: string) => BrioSprite} getSprite Returns the BrioSprite object with the given name
-     * @property {(audioName: string) => GameAudio} getAudio Returns the GameAudio object with the given name
+     * @property {(audioName: string) => BrioAudio} getAudio Returns the BrioAudio object with the given name
      * @property {(gameObjectName: string) => BrioObject} getObject Returns the BrioObject with the given name
      * @property {(mapName: string) => BrioObject} getMap Returns the GameMap with the given name
      * @property {(cameraName: string) => BrioObject} getCamera Returns the GameCamera with the given name
@@ -382,7 +382,7 @@ export class Game {
                             return aud;
                         }
                     }
-                    return GameAudio.getEmptyInstance();
+                    return BrioAudio.getEmptyInstance();
                 },
                 getObject: (gameObjectName) => {
                     if (!this.#loadedGameObjects.has(gameObjectName) &&
