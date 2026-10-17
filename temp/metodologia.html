@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metodologia - BrioJS (XI ME²PI)</title>
+    <!-- Devicon Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #eef2f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            gap: 20px;
+        }
+
+        /* Barra de acoes */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-download {
+            background-color: #0d2f61;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: Arial, Helvetica, sans-serif;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-download:hover {
+            background-color: #091f42;
+        }
+
+        /* Container da secao de poster (Flat) */
+        #poster-metodologia {
+            width: 1000px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 24px;
+            border: 2px solid #cbd5e1;
+        }
+
+        .metodologia-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        /* Coluna da Esquerda: Fases */
+        .fases-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sub-title {
+            font-size: 19px;
+            font-weight: bold;
+            color: #0d2f61;
+            margin-bottom: 4px;
+        }
+
+        .fase-card {
+            display: flex;
+            align-items: center;
+            background-color: #f1f5fa;
+            border: 1.5px solid #cbdbee;
+            border-radius: 8px;
+            padding: 12px 16px;
+            gap: 16px;
+        }
+
+        .fase-icon-box {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            background-color: #ffffff;
+            border: 1.5px solid #0d2f61;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #0d2f61;
+            font-size: 20px;
+        }
+
+        .fase-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .fase-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #0d2f61;
+        }
+
+        .fase-desc {
+            font-size: 13px;
+            color: #334155;
+            line-height: 1.35;
+        }
+
+        /* Ciclo DSR */
+        .dsr-feedback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 4px;
+            padding: 10px 12px;
+            background-color: #f8fafc;
+            border: 1.5px dashed #0d2f61;
+            border-radius: 6px;
+            color: #0d2f61;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .dsr-feedback i {
+            font-size: 15px;
+        }
+
+        /* Coluna da Direita: Pilares e Tecnologias */
+        .info-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .pilares-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pilares-list li {
+            position: relative;
+            padding-left: 18px;
+            font-size: 14px;
+            color: #1e293b;
+            line-height: 1.4;
+        }
+
+        .pilares-list li::before {
+            content: "•";
+            position: absolute;
+            left: 2px;
+            top: -2px;
+            color: #0d2f61;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Grade de Tecnologias */
+        .tech-box {
+            background-color: #f8fafc;
+            border: 1.5px solid #cbdbee;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .tech-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            border: 1px solid #cbdbee;
+            border-radius: 6px;
+            padding: 12px 6px;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .tech-item i {
+            font-size: 38px;
+        }
+
+        .tech-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #0d2f61;
+        }
+
+        .tech-sub {
+            font-size: 10px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Botao de Download -->
+    <div class="toolbar">
+        <button class="btn-download" id="download-btn">Baixar Imagem em Alta Resolucao (PNG)</button>
+    </div>
+
+    <!-- Container Principal do Banner (Sem titulo de METODOLOGIA) -->
+    <div id="poster-metodologia">
+        <div class="metodologia-grid">
+            <!-- Coluna Esquerda: Fases do Desenvolvimento -->
+            <div class="fases-container">
+                <div class="sub-title">Fases do Desenvolvimento:</div>
+
+                <!-- Fase 1 -->
+                <div class="fase-card">
+                    <div class="fase-icon-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <div class="fase-text">
+                        <div class="fase-title">1. Pesquisa e Requisitos</div>
+                        <div class="fase-desc">Mapeamento de dificuldades de iniciantes e definicao da arquitetura.</div>
+                    </div>
+                </div>
+
+                <!-- Fase 2 -->
+                <div class="fase-card">
+                    <div class="fase-icon-box">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <div class="fase-text">
+                        <div class="fase-title">2. Desenvolvimento da Engine</div>
+                        <div class="fase-desc">Implementacao dos sistemas centrais e modularizacao do codigo.</div>
+                    </div>
+                </div>
+
+                <!-- Fase 3 -->
+                <div class="fase-card">
+                    <div class="fase-icon-box">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div class="fase-text">
+                        <div class="fase-title">3. Prototipos e Validacao</div>
+                        <div class="fase-desc">Criacao de jogos didaticos de teste e validacao de desempenho.</div>
+                    </div>
+                </div>
+
+                <!-- Fase 4 -->
+                <div class="fase-card">
+                    <div class="fase-icon-box">
+                        <i class="fa-solid fa-square-check"></i>
+                    </div>
+                    <div class="fase-text">
+                        <div class="fase-title">4. Testes com Usuarios</div>
+                        <div class="fase-desc">Avaliacao pratica com estudantes do IFPR para analise de aprendizado.</div>
+                    </div>
+                </div>
+
+                <!-- Linha Ciclica DSR -->
+                <div class="dsr-feedback">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Avaliacao Continua e Refinamento do Artefato (DSR)</span>
+                </div>
+            </div>
+
+            <!-- Coluna Direita: Pilares & Tecnologias -->
+            <div class="info-container">
+                <div>
+                    <ul class="pilares-list">
+                        <li><strong>Abordagem Design Science Research</strong> focada na criacao e avaliacao do artefato.</li>
+                        <li><strong>Execucao Direta no Navegador</strong> sem necessidade de instalacao ou setup local.</li>
+                        <li><strong>Assistente de IA Especializado</strong> via RAG com Manifesto e adaptadores DoRA em modelos compactos.</li>
+                    </ul>
+                </div>
+
+                <!-- Grade de Tecnologias -->
+                <div class="tech-box">
+                    <div class="sub-title" style="font-size: 16px;">Tecnologias:</div>
+                    <div class="tech-grid">
+                        <!-- TypeScript -->
+                        <div class="tech-item">
+                            <i class="devicon-typescript-plain colored"></i>
+                            <span class="tech-name">TypeScript</span>
+                            <span class="tech-sub">Logica & Tipagem</span>
+                        </div>
+
+                        <!-- JavaScript -->
+                        <div class="tech-item">
+                            <i class="devicon-javascript-plain colored"></i>
+                            <span class="tech-name">JavaScript</span>
+                            <span class="tech-sub">Execução & Scripting</span>
+                        </div>
+
+                        <!-- HTML5 Canvas -->
+                        <div class="tech-item">
+                            <i class="devicon-html5-plain colored"></i>
+                            <span class="tech-name">HTML5</span>
+                            <span class="tech-sub">Renderização & DOM</span>
+                        </div>
+
+                        <!-- CSS3 -->
+                        <div class="tech-item">
+                            <i class="devicon-css3-plain colored"></i>
+                            <span class="tech-name">CSS3</span>
+                            <span class="tech-sub">Layout & Estilo</span>
+                        </div>
+
+                        <!-- Browser Runtime & Hardware APIs -->
+                        <div class="tech-item">
+                            <i class="devicon-chrome-plain colored"></i>
+                            <span class="tech-name">Browser</span>
+                            <span class="tech-sub">Renderização & Áudio</span>
+                        </div>
+
+                        <!-- Node.js / NPM -->
+                        <div class="tech-item">
+                            <i class="devicon-nodejs-plain colored"></i>
+                            <span class="tech-name">Node.js / NPM</span>
+                            <span class="tech-sub">Build & Pacote</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Exportacao -->
+    <script>
+        document.getElementById('download-btn').addEventListener('click', function () {
+            const element = document.getElementById('poster-metodologia');
+            const originalText = this.textContent;
+            this.textContent = 'Gerando imagem...';
+            this.disabled = true;
+
+            html2canvas(element, {
+                scale: 3,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'metodologia_briojs_mepi.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                this.textContent = originalText;
+                this.disabled = false;
+            }).catch(err => {
+                console.error('Erro ao gerar imagem:', err);
+                alert('Nao foi possivel exportar automaticamente. Voce pode tirar um print.');
+                this.textContent = originalText;
+                this.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
